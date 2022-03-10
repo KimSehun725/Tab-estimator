@@ -247,8 +247,6 @@ class CustomLoss(nn.Module):
         for head in range(attn.shape[1]):
             attn_loss += self.GALoss(attn[:, head], olens, olens)
 
-        print("loss : {:.4f}, {:.4f}, {:.4f}".format(
-            frame_loss, note_loss, attn_loss))
         if self.use_galoss:
             loss = frame_loss + note_loss + attn_loss
         else:
@@ -295,9 +293,9 @@ class ConvStack(nn.Module):
         return y
 
 
-class ESPNetTransformer(ASRInterface, torch.nn.Module):
+class TabEstimator(ASRInterface, torch.nn.Module):
     def __init__(self, mode, encoder_type, use_custom_decimation_func, use_conv_stack, n_bins, hop_length, sr, encoder_heads=1, encoder_layers=1, normalize_before=True):
-        super(ESPNetTransformer, self).__init__()
+        super(TabEstimator, self).__init__()
         self.mode = mode
         self.use_custom_decimation_func = use_custom_decimation_func
         self.use_conv_stack = use_conv_stack

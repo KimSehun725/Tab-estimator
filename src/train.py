@@ -10,7 +10,7 @@ import random
 import time
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
+import torch_optimizer as optim
 from torch.utils.data import Dataset
 from torch.utils.data.sampler import SubsetRandomSampler
 from ignite.engine import Engine, Events
@@ -19,7 +19,7 @@ from ignite.utils import convert_tensor
 import tensorboardX
 from torch_lr_finder import LRFinder
 from random import choices, sample, seed, shuffle
-from Transformer_espnet import ESPNetTransformer, CustomLoss, calculate_score
+from network import TabEstimator, CustomLoss, calculate_score
 from espnet.nets.pytorch_backend.nets_utils import make_non_pad_mask
 
 
@@ -193,7 +193,7 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
     torch.backends.cudnn.benchmark = True
     torch.backends.cudnn.deterministic = True
 
-    model = ESPNetTransformer(mode, encoder_type, use_custom_decimation_func, use_conv_stack, n_bins, hop_length, sr, encoder_heads=encoder_heads,
+    model = TabEstimator(mode, encoder_type, use_custom_decimation_func, use_conv_stack, n_bins, hop_length, sr, encoder_heads=encoder_heads,
                               encoder_layers=encoder_layers)
     for p in model.parameters():
         if p.dim() > 1:
@@ -204,7 +204,7 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
 
     optimizer = optim.RAdam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
-        optimizer, 32, gamma=0.5, verbose=True)
+        optimizer, 32, gamma=0.5, verbose=False)
 
     model.cuda()
     criterion.cuda()
@@ -295,15 +295,8 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
 
     @trainer.on(Events.ITERATION_COMPLETED)
     def log_training_loss(trainer):
-        if (trainer.state.iteration+1) % 100 == 0:
-            print("Epoch[{}] Iteration[{}/{}] Loss: {:.4f}".format(trainer.state.epoch,
-                                                                   (trainer.state.iteration % len(
-                                                                       train_loader))+1,
-                                                                   len(train_loader),
-                                                                   trainer.state.output))
         writer.add_scalar("train/loss", trainer.state.output,
                           trainer.state.iteration)
-        # print(loss_container.loss_value)
         loss_container.update_itr()
 
     @trainer.on(Events.EPOCH_COMPLETED)
@@ -314,7 +307,6 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
         writer.add_scalar("train/avg_loss",
                           avg_loss, trainer.state.epoch)
         loss_container.reset_epoch()
-        # if bin(trainer.state.epoch).count("1") == 1:
         if trainer.state.epoch % 32 == 0:
             modelname = "epoch{}.model".format(trainer.state.epoch)
             if not os.path.exists(model_dir):
@@ -324,7 +316,6 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
 
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_validation_results(trainer):
-        # if valid_index:
         evaluator.run(valid_loader)
         metrics = evaluator.state.metrics
         print("Validation Results - Epoch: {}  Avg loss: {:.4f}"
@@ -341,9 +332,6 @@ def main(mode, input_feature_type, encoder_type, use_custom_decimation_func, use
     data_path = os.path.join(
         "data", "npz", f"original", "split", "*.npz")
     data_list = np.array(glob.glob(data_path, recursive=True))
-
-    #train_data_list = np.array(glob.glob(train_data_path, recursive=True))
-    #valid_data_list = np.array(glob.glob(valid_data_path, recursive=True))
 
     now = datetime.datetime.now()
     tensorboard_dir = os.path.join("tensorboard", "{0:%Y%m%d%H%M}".format(now))

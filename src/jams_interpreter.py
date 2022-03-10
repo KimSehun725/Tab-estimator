@@ -55,7 +55,7 @@ def jams_to_midi(jam, tempo=120, q=1, quantization=0):
                     k = k + 1
                 if k == 0:
                     k = 1
-                    print("duration is 0, ", k)
+                    #print("duration is 0, ", k)
                 dur = k * note_dur
 
             else:
