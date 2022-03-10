@@ -1,0 +1,22 @@
+note_resolution: 16 # th note
+down_sampling_rate: 22050
+bins_per_octave: 24
+cqt_n_bins: 192
+hop_length: 512
+generated_midi_n_bars: 4
+n_cores: 12
+
+train_ratio: 0.9
+epoch: 192
+lr: 0.005
+seed_: 0
+d_model: 512
+encoder_heads: 1
+encoder_layers: 1
+
+mode: "tab"                      # "F0" or "tab"
+input_feature_type: "cqt"   # "cqt" or "melspec"
+encoder_type: "conformer"       # "transformer" or "conformer"
+use_custom_decimation_func: True
+use_conv_stack: True
+use_galoss: True
