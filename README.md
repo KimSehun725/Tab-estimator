@@ -16,7 +16,6 @@ Tab-Estimator
 │   ├── train.py
 │   └── visualize.py
 ├── tensorboard
-├── visualize
 └── requiments.txt
 ```
 
