@@ -2,7 +2,7 @@
 ## File structure
 
 ```
-Tab-Estimator
+Tab-estimator
 ├── data
 ├── model
 ├── result
@@ -79,7 +79,7 @@ pip install -r requirements.txt
 
 ## Running the code
 
-In all of the following instructions, we will assume that you are in `Tab-Estimator/` directory.
+In all of the following instructions, we will assume that you are in `Tab-estimator/` directory.
 
 ### Make input and output features
 Run [jams_to_midi.py](https://github.com/KimSehun725/Tab-estimator/blob/master/src/jams_to_midi.py). 
