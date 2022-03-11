@@ -107,7 +107,7 @@ def visualize(npz_filename_list, kwargs):
         n_subplots = (
             3 + encoder_layers * encoder_heads) if mode == "F0" else (5 + encoder_layers * encoder_heads)
 
-        plt.figure(figsize=(10, n_subplots*3), dpi=500)
+        plt.figure(figsize=(10, n_subplots*3), dpi=200)
         plt.rc('axes', labelsize=15) 
         plt.rc('xtick', labelsize=12)
         plt.rc('ytick', labelsize=12)

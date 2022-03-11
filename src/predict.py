@@ -5,7 +5,7 @@ import torch
 import pandas as pd
 import tqdm
 import yaml
-from Transformer_espnet import ESPNetTransformer
+from network import TabEstimator
 from visualize import visualize
 import tqdm
 from matplotlib import lines as mlines, pyplot as plt
@@ -79,7 +79,7 @@ def calc_score(test_num, trained_model, use_model_epoch, config_path, plot_resul
     elif input_feature_type == "melspec":
         n_bins = 128
 
-    model = ESPNetTransformer(mode, encoder_type, use_custom_decimation_func, use_conv_stack, n_bins, hop_length, down_sampling_rate, encoder_heads=encoder_heads,
+    model = TabEstimator(mode, encoder_type, use_custom_decimation_func, use_conv_stack, n_bins, hop_length, down_sampling_rate, encoder_heads=encoder_heads,
                               encoder_layers=encoder_layers)
     model.load_state_dict(torch.load(
         model_path, map_location=torch.device("cpu")))
@@ -370,6 +370,7 @@ def main():
     csv_path = os.path.join(result_path, f"{mode}", trained_model +
                             f"_epoch{use_model_epoch}", "metrics.csv")
     for test_num in range(6):
+        print(f"Player No. {test_num}")
         result = result.append(calc_score(test_num, trained_model, use_model_epoch, config_path, plot_results=plot_results,
                                           input_as_random_noize=input_as_random_noize, make_notelvl_from_framelvl=make_notelvl_from_framelvl, verbose=verbose))
     result = result.append(result.describe()[1:3])

@@ -11,8 +11,6 @@ import math
 from multiprocessing import Pool
 from itertools import repeat
 
-np.set_printoptions(threshold=sys.maxsize)
-
 
 def pitch_to_nfrets(pitch, string_name):
     string_midi_pitches = [40, 45, 50, 55, 59, 64]
@@ -125,8 +123,6 @@ def main(midi_filename_list, kwargs):
             for j, note in enumerate(midi_string.notes):
                 frets, string_n = pitch_to_nfrets(note.pitch, string_name)
                 if int(round(note.start / note_dur)) >= len_in_notes:
-                    print(os.path.split(midi_filename)[1])
-                    print(note.start, note_dur, len_in_notes)
                     break
                 tab_onset[int(round(note.start / note_dur)), string_n, 20] = 0
                 tab_onset[int(round(note.start / note_dur)),
@@ -344,5 +340,5 @@ if __name__ == "__main__":
     # check for missing file
     for midi_filename in midi_filename_list:
         name = os.path.split(midi_filename)[1][:-4]
-        if not os.path.exists("data/npz/auto_quantized_16/" + name + ".npz"):
+        if not os.path.exists("data/npz/original/" + name + ".npz"):
             print(f"{name} does not exist!")
