@@ -163,6 +163,8 @@ def main(midi_filename_list, kwargs):
         for midi_string in midi_file.instruments:
             string_name = midi_string.name
             for j, note in enumerate(midi_string.notes):
+                if int(round(note.start / note_dur)) >= len_in_notes:
+                    break
                 pitch = note.pitch - 40
                 F0_onset[int(round(note.start / note_dur)), pitch] = 1
 
@@ -305,7 +307,7 @@ if __name__ == "__main__":
         note_resolution = obj["note_resolution"]
         down_sampling_rate = obj["down_sampling_rate"]
         bins_per_octave = obj["bins_per_octave"]
-        n_bins = obj["n_bins"]
+        n_bins = obj["cqt_n_bins"]
         hop_length = obj["hop_length"]
         n_cores = obj["n_cores"]
 

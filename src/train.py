@@ -17,10 +17,8 @@ from ignite.engine import Engine, Events
 from ignite.metrics import Loss, Metric
 from ignite.utils import convert_tensor
 import tensorboardX
-from torch_lr_finder import LRFinder
 from random import choices, sample, seed, shuffle
-from network import TabEstimator, CustomLoss, calculate_score
-from espnet.nets.pytorch_backend.nets_utils import make_non_pad_mask
+from network import TabEstimator, CustomLoss
 
 
 class LossWrapper(Loss):
@@ -194,21 +192,18 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
     torch.backends.cudnn.deterministic = True
 
     model = TabEstimator(mode, encoder_type, use_custom_decimation_func, use_conv_stack, n_bins, hop_length, sr, encoder_heads=encoder_heads,
-                              encoder_layers=encoder_layers)
+                         encoder_layers=encoder_layers)
     for p in model.parameters():
         if p.dim() > 1:
             nn.init.xavier_uniform_(p)
 
     criterion = CustomLoss(mode, use_galoss)
-    metrics_fn = calculate_score()
-
     optimizer = optim.RAdam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, 32, gamma=0.5, verbose=False)
 
     model.cuda()
     criterion.cuda()
-    metrics_fn.cuda()
     device = "cuda"
 
     train_dataset = CustomDataset(train_data_list, mode, input_feature_type)
@@ -219,13 +214,13 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
         shuffle=True,
         collate_fn=(F0_pad_collate if mode == "F0" else tab_pad_collate),
         num_workers=n_cores,
-        pin_memory=True)
+        pin_memory=False)
     valid_loader = torch.utils.data.DataLoader(
         dataset=valid_dataset,
         batch_size=1,
         shuffle=False,
         num_workers=n_cores,
-        pin_memory=True)
+        pin_memory=False)
 
     class Loss_container():
         def __init__(self):
@@ -302,7 +297,7 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
     @trainer.on(Events.EPOCH_COMPLETED)
     def log_training_results(trainer):
         avg_loss = loss_container.epoch_loss_value / len(train_loader)
-        print("Training Results - Epoch: {}  Avg loss: {:.4f}"
+        print("Training Results \t- Epoch: {}  Avg loss: {:.4f}"
               .format(trainer.state.epoch, avg_loss))
         writer.add_scalar("train/avg_loss",
                           avg_loss, trainer.state.epoch)
@@ -318,7 +313,7 @@ def train(mode, input_feature_type, encoder_type, use_custom_decimation_func, us
     def log_validation_results(trainer):
         evaluator.run(valid_loader)
         metrics = evaluator.state.metrics
-        print("Validation Results - Epoch: {}  Avg loss: {:.4f}"
+        print("Validation Results \t- Epoch: {}  Avg loss: {:.4f}"
               .format(trainer.state.epoch, metrics["Loss"]))
         writer.add_scalar("valid/avg_loss",
                           metrics["Loss"], trainer.state.epoch)

@@ -14,9 +14,9 @@ d_model: 512
 encoder_heads: 1
 encoder_layers: 1
 
-mode: "tab"                      # "F0" or "tab"
-input_feature_type: "cqt"   # "cqt" or "melspec"
-encoder_type: "conformer"       # "transformer" or "conformer"
-use_custom_decimation_func: True
+mode: "tab"                       # "F0" or "tab"
+input_feature_type: "cqt"         # "cqt" or "melspec"
+encoder_type: "conformer"         # "transformer" or "conformer"
+use_custom_decimation_func: True  # False to use selection-based decimation
 use_conv_stack: True
 use_galoss: True
